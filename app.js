@@ -1,19 +1,19 @@
 const API_BASE = "http://localhost:8080";
 
-// 🔐 Get token
+//  Get token
 function getToken() {
     return localStorage.getItem("token");
 }
 
-// 🚪 Redirect if not logged in
+//  Redirect if not logged in
 if (!getToken()) {
     window.location.href = "index.html";
 }
 
-// 📥 Load tasks on page load
+//  Load tasks on page load
 window.onload = loadTasks;
 
-// 🔄 Load tasks
+//  Load tasks
 function loadTasks() {
     fetch(`${API_BASE}/tasks`, {
         headers: {
@@ -43,7 +43,7 @@ function loadTasks() {
         });
 }
 
-// ➕ Create task
+//  Create task
 function createTask() {
     const title = document.getElementById("title").value;
     const description = document.getElementById("description").value;
@@ -64,7 +64,7 @@ function createTask() {
         });
 }
 
-// 🗑 Delete task
+//  Delete task
 function deleteTask(id) {
     fetch(`${API_BASE}/tasks/${id}`, {
         method: "DELETE",
@@ -75,7 +75,7 @@ function deleteTask(id) {
         .then(() => loadTasks());
 }
 
-// 🚪 Logout
+//  Logout
 function logout() {
     localStorage.removeItem("token");
     window.location.href = "index.html";
