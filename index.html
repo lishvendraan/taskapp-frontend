@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskApp - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 🔵 Decorative Background -->
+<div class="bg-blob blob-1"></div>
+<div class="bg-blob blob-2"></div>
+
+<header class="app-header">
+    <h1>TaskApp</h1>
+    <p class="tagline">Organize your tasks. Boost your productivity.</p>
+</header>
+
+<main class="page">
+    <div class="container">
+        <h2>Welcome Back 👋</h2>
+        <p class="subtitle">Sign in to continue managing your tasks</p>
+
+        <input type="text" id="username" placeholder="Username" autocomplete="username">
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+
+        <button class="add" onclick="login()">Login</button>
+
+        <div class="error" id="error"></div>
+
+        <div class="divider">
+            <span>OR</span>
+        </div>
+
+        <div class="link-group">
+            <a href="register.html">Create new account</a>
+            <a href="reset-password.html">Forgot password?</a>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    © 2026 TaskApp · Built with Spring Boot & JavaScript
+</footer>
+
+<script>
+    const API_BASE = "http://localhost:8080";
+
+    if (localStorage.getItem("token")) {
+        window.location.href = "tasks.html";
+    }
+
+    async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const errorDiv = document.getElementById("error");
+
+        errorDiv.innerText = "";
+
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                errorDiv.innerText = data.message || "Login failed";
+                return;
+            }
+
+            localStorage.setItem("token", data.token);
+            window.location.href = "tasks.html";
+
+        } catch {
+            errorDiv.innerText = "Server error. Please try again.";
+        }
+    }
+</script>
+
+</body>
+</html>

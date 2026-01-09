@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskApp | My Tasks</title>
+    <style>/* RESET */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* BODY */
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        min-height: 100vh;
+        color: #333;
+    }
+
+    /* BACKGROUND BLOBS */
+    .bg-blob {
+        position: fixed;
+        width: 380px;
+        height: 380px;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.35;
+        z-index: -1;
+    }
+    .blob-1 { background: #8f9cff; top: -120px; left: -120px; }
+    .blob-2 { background: #9f7aea; bottom: -140px; right: -140px; }
+
+    /* HEADER */
+    .app-header {
+        padding: 24px;
+        text-align: center;
+        color: white;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+    }
+    .app-header h1 { font-size: 28px; }
+    .tagline { font-size: 14px; opacity: 0.9; }
+
+    /* PAGE */
+    .page {
+        display: flex;
+        justify-content: center;
+        padding: 30px;
+    }
+
+    /* TASK CARD */
+    .task-card {
+        width: 100%;
+        max-width: 460px;
+        background: #fff;
+        padding: 28px;
+        border-radius: 16px;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+    }
+
+    /* HEADER ROW */
+    .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .task-header h2 { margin: 0; }
+    .logout {
+        background: none;
+        border: none;
+        color: #667eea;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .logout:hover { text-decoration: underline; }
+
+    /* INPUTS */
+    input, select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    /* FILTERS */
+    .filters {
+        display: flex;
+        gap: 12px;
+    }
+
+    /* ADD */
+    .add-task { margin-top: 10px; }
+    .add {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    /* TASK LIST */
+    .tasks {
+        list-style: none;
+        margin-top: 18px;
+    }
+    .task {
+        background: #f7f9ff;
+        padding: 14px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+    .task.done span {
+        text-decoration: line-through;
+        opacity: 0.6;
+    }
+    .task-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .task-main label {
+        display: flex;
+        gap: 10px;
+        font-weight: 600;
+    }
+    .task-desc {
+        font-size: 13px;
+        color: #555;
+        margin-top: 6px;
+    }
+
+    /* ACTIONS */
+    .task-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .edit {
+        background: #edf2ff;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+    .delete {
+        background: #ffecec;
+        color: #c53030;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    /* PAGINATION */
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        font-size: 13px;
+    }
+    .pagination button {
+        background: #edf2ff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+    }
+    /* ⚠️ DANGER ZONE */
+    .danger-zone {
+        margin-top: 20px;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+        text-align: center;
+    }
+
+    .delete-account {
+        background: #ffe5e5;
+        color: #c53030;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        width: 100%;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .delete-account:hover {
+        background: #fed7d7;
+    }
+
+    /* FOOTER */
+    .footer {
+        text-align: center;
+        color: rgba(255,255,255,0.8);
+        font-size: 12px;
+        padding: 12px;
+    }
+    </style>
+</head>
+<body>
+
+<div class="bg-blob blob-1"></div>
+<div class="bg-blob blob-2"></div>
+
+<header class="app-header">
+    <h1>TaskApp</h1>
+    <p class="tagline">Organize your tasks. Boost your productivity.</p>
+</header>
+
+<main class="page">
+    <div class="task-card">
+
+        <!-- CARD HEADER -->
+        <div class="task-header">
+            <h2>My Tasks</h2>
+            <button class="logout" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- ⚠️ DANGER ZONE -->
+        <div class="danger-zone">
+            <button class="delete-account" onclick="deleteAccount()">
+                Delete My Account
+            </button>
+        </div>
+
+
+        <!-- SEARCH -->
+        <input id="search" placeholder="🔍 Search tasks..." oninput="applyFilters()" />
+
+        <!-- FILTERS -->
+        <div class="filters">
+            <select id="filterCompleted" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="true">Completed</option>
+                <option value="false">Pending</option>
+            </select>
+
+            <select id="sortOrder" onchange="applyFilters()">
+                <option value="asc">A → Z</option>
+                <option value="desc">Z → A</option>
+            </select>
+        </div>
+
+        <!-- ADD TASK -->
+        <div class="add-task">
+            <input id="title" placeholder="Task title" />
+            <input id="description" placeholder="Task description" />
+            <button class="add" onclick="createTask()">+ Add Task</button>
+        </div>
+
+        <!-- TASK LIST -->
+        <ul id="taskList" class="tasks"></ul>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+            <button onclick="prevPage()">← Previous</button>
+            <span id="pageInfo"></span>
+            <button onclick="nextPage()">Next →</button>
+        </div>
+
+    </div>
+</main>
+
+<footer class="footer">
+    © 2026 TaskApp • Built with Spring Boot & Vanilla JS
+</footer>
+
+<script>
+    const API_BASE = "http://localhost:8080";
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "index.html";
+
+    let allTasks = [];
+    let currentPage = 1;
+    const pageSize = 3;
+
+    applyFilters();
+
+    async function applyFilters() {
+        const search = document.getElementById("search").value;
+        const completed = document.getElementById("filterCompleted").value;
+        const order = document.getElementById("sortOrder").value;
+
+        let url = `${API_BASE}/tasks?sort=id,${order}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (completed !== "") url += `&completed=${completed}`;
+
+        const res = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        allTasks = await res.json();
+        currentPage = 1;
+        renderPage();
+    }
+
+    function renderPage() {
+        const list = document.getElementById("taskList");
+        list.innerHTML = "";
+
+        const start = (currentPage - 1) * pageSize;
+        const pageTasks = allTasks.slice(start, start + pageSize);
+
+        if (pageTasks.length === 0) {
+            list.innerHTML = "<li class='empty'>No tasks found</li>";
+            document.getElementById("pageInfo").textContent = "";
+            return;
+        }
+
+        pageTasks.forEach(task => {
+            const li = document.createElement("li");
+            li.className = task.completed ? "task done" : "task";
+
+            li.innerHTML = `
+            <div class="task-main">
+                <label>
+                    <input type="checkbox" ${task.completed ? "checked" : ""}
+                        onchange="toggleComplete(${task.id}, '${esc(task.title)}', '${esc(task.description || "")}', ${task.completed})">
+                    <span>${task.title}</span>
+                </label>
+                <div class="task-actions">
+                    <button class="edit" onclick="editTask(${task.id}, '${esc(task.title)}', '${esc(task.description || "")}', ${task.completed})">Edit</button>
+                    <button class="delete" onclick="deleteTask(${task.id})">Delete</button>
+                </div>
+            </div>
+            <p class="task-desc">${task.description || ""}</p>
+        `;
+            list.appendChild(li);
+        });
+
+        document.getElementById("pageInfo").textContent =
+            `Page ${currentPage} of ${Math.ceil(allTasks.length / pageSize)}`;
+    }
+
+    function nextPage() {
+        if (currentPage * pageSize < allTasks.length) {
+            currentPage++;
+            renderPage();
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPage();
+        }
+    }
+
+    async function createTask() {
+        const title = document.getElementById("title").value;
+        const description = document.getElementById("description").value;
+        if (!title) return alert("Title required");
+
+        await fetch(`${API_BASE}/tasks`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ title, description })
+        });
+
+        document.getElementById("title").value = "";
+        document.getElementById("description").value = "";
+        applyFilters();
+    }
+
+    async function editTask(id, title, description, completed) {
+        const newTitle = prompt("Edit title", title);
+        if (newTitle === null) return;
+        const newDesc = prompt("Edit description", description);
+
+        await fetch(`${API_BASE}/tasks/${id}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ title: newTitle, description: newDesc, completed })
+        });
+
+        applyFilters();
+    }
+
+    async function toggleComplete(id, title, description, completed) {
+        await fetch(`${API_BASE}/tasks/${id}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ title, description, completed: !completed })
+        });
+
+        applyFilters();
+    }
+
+    async function deleteTask(id) {
+        if (!confirm("Delete this task?")) return;
+        await fetch(`${API_BASE}/tasks/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        applyFilters();
+    }
+
+    function esc(text) {
+        return text.replace(/'/g, "\\'");
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+    }
+
+        async function deleteAccount() {
+        const confirmDelete = confirm(
+        "⚠️ This will permanently delete your account and all tasks.\n\nAre you sure?"
+        );
+
+        if (!confirmDelete) return;
+
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("http://localhost:8080/api/auth/me", {
+        method: "DELETE",
+        headers: {
+        "Authorization": `Bearer ${token}`
+    }
+    });
+
+        if (response.ok) {
+        alert("Your account has been deleted.");
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+    } else {
+        const err = await response.json();
+        alert(err.message || "Failed to delete account");
+    }
+    }
+
+
+
+</script>
+
+</body>
+</html>
